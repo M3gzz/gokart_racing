@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Apex Karting Lobby</title>
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;900&family=Outfit:wght@300;400;600;700&display=swap" rel="stylesheet">
+    <!-- FontAwesome for Premium Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Custom Style Sheet -->
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- LOBBY SYSTEM SYSTEM CONTAINER -->
+    <div id="app" class="hidden">
+        <!-- Close Button (Always visible on top right) -->
+        <button id="close-btn" class="icon-btn" title="Close Menu">
+            <i class="fa-solid fa-xmark"></i>
+        </button>
+
+        <div class="container">
+            <!-- Sidebar / Header Brand -->
+            <div class="sidebar">
+                <div class="brand">
+                    <i class="fa-solid fa-flag-checkered logo-icon"></i>
+                    <h1>ELLIE'S<span>KARTING</span></h1>
+                </div>
+                <div class="nav-links">
+                    <button class="nav-btn active" id="btn-browser"><i class="fa-solid fa-compass"></i> Browse Lobbies</button>
+                    <button class="nav-btn hidden" id="btn-creator-tab"><i class="fa-solid fa-map-location-dot"></i> Create Track</button>
+                    <button class="nav-btn recovery-btn" id="btn-force-leave" title="Recover from a glitched/stuck session"><i class="fa-solid fa-triangle-exclamation"></i> Force Leave</button>
+                </div>
+                <div class="footer-info">
+                    <p>Status: <span class="status-online">Online</span></p>
+                    <p class="ver-code">v1.0.0 (Phase 1 & 2)</p>
+                </div>
+            </div>
+
+            <!-- Main Panel Area -->
+            <div class="main-panel">
+                <!-- VIEW 1: LOBBY BROWSER -->
+                <div id="view-browser" class="panel-view">
+                    <div class="panel-header">
+                        <div>
+                            <h2>Race Lobbies</h2>
+                            <p>Browse active lobbies or create a new one to race your friends.</p>
+                        </div>
+                        <button id="btn-open-create" class="btn btn-primary">
+                            <i class="fa-solid fa-plus"></i> Create Lobby
+                        </button>
+                    </div>
+
+                    <div class="lobby-list-container">
+                        <table class="lobby-table">
+                            <thead>
+                                <tr>
+                                    <th>Lobby Name</th>
+                                    <th>Track</th>
+                                    <th>Host</th>
+                                    <th>Racers</th>
+                                    <th>Status</th>
+                                    <th class="actions-header">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody id="lobby-list-tbody">
+                                <!-- Dynamic items loaded via JS -->
+                            </tbody>
+                        </table>
+                        <div id="no-lobbies" class="empty-state">
+                            <i class="fa-solid fa-ghost"></i>
+                            <h3>No Active Lobbies</h3>
+                            <p>Be the first to create a lobby and kick off the tournament!</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- VIEW 2: CREATE LOBBY MODAL -->
+                <div id="view-create" class="panel-view hidden">
+                    <div class="panel-header">
+                        <div>
+                            <h2>Configure Race Lobby</h2>
+                            <p>Select your track, player limits, and lobby settings.</p>
+                        </div>
+                        <button id="btn-back-browser" class="btn btn-secondary">
+                            <i class="fa-solid fa-arrow-left"></i> Back
+                        </button>
+                    </div>
+
+                    <form id="create-lobby-form" class="form-container">
+                        <div class="form-group">
+                            <label for="input-lobby-name">Lobby Name</label>
+                            <input type="text" id="input-lobby-name" placeholder="e.g. LSIA Drift Mania" maxlength="25" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="select-track">Track Location</label>
+                            <select id="select-track" required>
+                                <!-- Options populated dynamically -->
+                            </select>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="select-max-players">Max Players</label>
+                                <select id="select-max-players">
+                                    <option value="1">1 Racer (Test)</option>
+                                    <option value="2">2 Racers</option>
+                                    <option value="4" selected>4 Racers</option>
+                                    <option value="6">6 Racers</option>
+                                    <option value="8">8 Racers</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="select-kart-model">Select Gokart</label>
+                                <select id="select-kart-model" required>
+                                    <!-- Options populated dynamically -->
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="button" id="btn-cancel-create" class="btn btn-secondary">Cancel</button>
+                            <button type="submit" class="btn btn-primary">Create & Configure</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- VIEW 4: CREATE TRACK PANEL -->
+                <div id="view-creator" class="panel-view hidden">
+                    <div class="panel-header">
+                        <div>
+                            <h2>Track Creator Studio</h2>
+                            <p>Build and record custom racing tracks with starting grids and checkpoints.</p>
+                        </div>
+                        <button id="btn-back-creator" class="btn btn-secondary">
+                            <i class="fa-solid fa-arrow-left"></i> Back
+                        </button>
+                    </div>
+
+                    <form id="create-track-form" class="form-container">
+                        <div class="form-group">
+                            <label for="input-track-name">Track Name</label>
+                            <input type="text" id="input-track-name" placeholder="e.g. Redwood Rally" maxlength="30" required>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="input-track-laps">Default Laps</label>
+                                <input type="number" id="input-track-laps" min="1" max="20" value="3" required>
+                            </div>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="button" id="btn-cancel-creator" class="btn btn-secondary">Cancel</button>
+                            <button type="submit" class="btn btn-primary"><i class="fa-solid fa-play"></i> Start Recording</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- VIEW 5: NPC SETUP PANEL -->
+                <div id="view-setup" class="panel-view hidden">
+                    <div class="panel-header">
+                        <div>
+                            <h2>NPC Coordinator Setup</h2>
+                            <p>Configure the position, ped model, and idle scenario of the Gokart NPC.</p>
+                        </div>
+                    </div>
+
+                    <form id="setup-npc-form" class="form-container">
+                        <div class="form-group">
+                            <label>Current Coordinates & Heading</label>
+                            <div class="coords-display">
+                                <div><span>X:</span> <span id="setup-coords-x">0.00</span></div>
+                                <div><span>Y:</span> <span id="setup-coords-y">0.00</span></div>
+                                <div><span>Z:</span> <span id="setup-coords-z">0.00</span></div>
+                                <div><span>H:</span> <span id="setup-coords-h">0.00</span></div>
+                            </div>
+                            <span class="form-tip">The NPC will spawn exactly where your character is currently standing.</span>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="select-setup-model">Ped Model</label>
+                                <select id="select-setup-model" required>
+                                    <option value="a_m_y_motox_02" selected>MotoX Rider (Default)</option>
+                                    <option value="s_m_m_highsec_01">Security Guard</option>
+                                    <option value="ig_benny">Benny</option>
+                                    <option value="u_m_y_prostitutecops">Prostitute Cop</option>
+                                    <option value="s_m_y_cop_01">Cop</option>
+                                    <option value="a_m_y_beach_01">Beach Guy</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label for="select-setup-scenario">Idle Scenario</label>
+                                <select id="select-setup-scenario">
+                                    <option value="WORLD_HUMAN_STAND_IMPATIENT" selected>Impatient Stand (Default)</option>
+                                    <option value="WORLD_HUMAN_CLIPBOARD">Clipboard Writing</option>
+                                    <option value="WORLD_HUMAN_COP_IDLES">Cop Idle</option>
+                                    <option value="WORLD_HUMAN_SMOKING">Smoking</option>
+                                    <option value="WORLD_HUMAN_LEANING">Leaning</option>
+                                    <option value="WORLD_HUMAN_GUARD_STAND">Guard Stand</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="button" id="btn-preview-npc" class="btn btn-secondary">
+                                <i class="fa-solid fa-eye"></i> Preview Here
+                            </button>
+                            <div class="action-buttons-right">
+                                <button type="button" id="btn-cancel-setup" class="btn btn-secondary">Cancel</button>
+                                <button type="submit" class="btn btn-primary"><i class="fa-solid fa-floppy-disk"></i> Save & Apply</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- VIEW 3: LOBBY ROOM (INSIDE LOBBY) -->
+                <div id="view-room" class="panel-view hidden">
+                    <div class="panel-header">
+                        <div>
+                            <h2 id="room-name">Lobby Name</h2>
+                            <p id="room-track"><i class="fa-solid fa-map-location-dot"></i> LSIA GP</p>
+                        </div>
+                        <div class="room-status-badge" id="room-status">
+                            WAITING
+                        </div>
+                    </div>
+
+                    <div class="room-grid">
+                        <!-- Left Side: Member List -->
+                        <div class="room-members">
+                            <h3>Roster (<span id="room-player-count">1</span>/<span id="room-max-players">8</span>)</h3>
+                            <div class="member-list" id="room-member-list">
+                                <!-- Populate dynamically -->
+                            </div>
+                        </div>
+
+                        <!-- Right Side: Track Info Card & Host Controls -->
+                        <div class="room-details">
+                            <div class="track-preview-card">
+                                <div class="track-header">
+                                    <i class="fa-solid fa-route"></i>
+                                    <h4 id="details-track-name">LSIA GP</h4>
+                                </div>
+                                <div class="track-info-grid">
+                                    <div class="info-item">
+                                        <span class="label">Laps</span>
+                                        <span class="value" id="details-track-laps">3 Laps</span>
+                                    </div>
+                                    <div class="info-item">
+                                        <span class="label">Starting Type</span>
+                                        <span class="value">Grid Standstart</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="betting-card">
+                                <div class="betting-header">
+                                    <i class="fa-solid fa-coins bet-icon"></i>
+                                    <h4>Race Betting Pool</h4>
+                                </div>
+                                <div class="betting-body">
+                                    <div class="bet-info-row">
+                                        <span class="label">Total Pool</span>
+                                        <span class="value" id="room-total-pool">$0</span>
+                                    </div>
+                                    <div class="bet-input-group">
+                                        <input type="number" id="input-bet-amount" min="1" placeholder="Bet Amount ($)">
+                                        <button type="button" id="btn-submit-bet" class="btn btn-primary">Place Bet</button>
+                                    </div>
+                                    
+                                    <!-- List of active bets placed -->
+                                    <div class="bets-list-container">
+                                        <h5>ACTIVE BETS</h5>
+                                        <div id="room-bets-list" class="bets-list">
+                                            <!-- Dynamically populated bets -->
+                                        </div>
+                                    </div>
+
+                                    <p class="bet-hint">Winner takes all! Cash is deducted immediately.</p>
+                                </div>
+                            </div>
+
+                             <div class="room-controls">
+                                 <!-- Host actions -->
+                                 <button id="btn-start-race" class="btn btn-success hidden">
+                                     <i class="fa-solid fa-play"></i> Start Match
+                                 </button>
+                                 <button id="btn-close-lobby" class="btn btn-danger hidden">
+                                     <i class="fa-solid fa-trash-can"></i> Close Lobby
+                                 </button>
+                                 <span id="non-host-msg" class="waiting-msg">
+                                     <i class="fa-solid fa-spinner fa-spin"></i> Waiting for host to start...
+                                 </span>
+                                 <button id="btn-leave-room" class="btn btn-danger">
+                                     <i class="fa-solid fa-door-open"></i> Leave Lobby
+                                 </button>
+                             </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- =========================================================================
+    PHASE 2 ELEMENTS (Race HUD, Countdown & Results)
+    ========================================================================= -->
+
+    <!-- DYNAMIC RACE HUD OVERLAY -->
+    <div id="hud-container" class="hidden">
+        <!-- Top HUD Timer Cards -->
+        <div class="hud-top-bar">
+            <div class="hud-card">
+                <span class="label">CURRENT LAP</span>
+                <span class="value" id="hud-lap-time">00:00.00</span>
+            </div>
+            <div class="hud-card accent-card">
+                <span class="label">TOTAL TIME</span>
+                <span class="value" id="hud-total-time">00:00.00</span>
+            </div>
+            <div class="hud-card">
+                <span class="label">BEST LAP</span>
+                <span class="value" id="hud-best-lap">--:--.--</span>
+            </div>
+        </div>
+
+        <!-- Position & Lap Indicators -->
+        <div class="hud-bottom-left">
+            <div class="hud-position-box">
+                <span id="hud-position">1</span><span class="pos-suffix" id="hud-position-suffix">ST</span>
+            </div>
+            <div class="hud-lap-box">
+                <span class="label">LAP</span>
+                <span class="value"><span id="hud-current-lap">1</span> / <span id="hud-total-laps">3</span></span>
+            </div>
+        </div>
+
+        <!-- Live Leaderboard List -->
+        <div class="hud-leaderboard">
+            <h4>POSITIONS</h4>
+            <div class="leaderboard-items" id="hud-leaderboard-items">
+                <!-- Rendered dynamically -->
+            </div>
+        </div>
+    </div>
+
+    <!-- RACE START COUNTDOWN OVERLAY -->
+    <div id="countdown-container" class="hidden">
+        <h1 id="countdown-number">3</h1>
+    </div>
+
+    <!-- MATCH RESULTS SCOREBOARD -->
+    <div id="results-container" class="hidden">
+        <div class="results-modal">
+            <div class="results-header">
+                <i class="fa-solid fa-trophy trophy-icon"></i>
+                <h2>RACE STANDINGS</h2>
+                <p id="results-track-name">Track Location Name</p>
+            </div>
+            <div class="results-rankings" id="results-rankings-list">
+                <!-- Dynamically populated scoreboard list -->
+            </div>
+            <div class="results-footer">
+                <p><i class="fa-solid fa-clock-rotate-left"></i> Lobby will expire in 3 seconds. Press [SPACE] or click anywhere to exit immediately.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- TRACK CREATOR HUD OVERLAY (FLOATING GREEN BUBBLE ON THE LEFT) -->
+    <div id="creator-hud" class="hidden">
+        <div class="creator-bubble">
+            <div class="bubble-header">
+                <i class="fa-solid fa-map-location-dot"></i>
+                <div class="bubble-title-group">
+                     <h4 id="creator-hud-track-name">TRACK CREATOR</h4>
+                     <span class="bubble-subtitle">Recording...</span>
+                </div>
+            </div>
+            
+            <div class="bubble-stats">
+                <div class="stat-row">
+                     <span class="label"><i class="fa-solid fa-grip-vertical"></i> Starting Grids:</span>
+                     <span class="value" id="creator-hud-grids">0 / 8</span>
+                </div>
+                <div class="stat-row">
+                     <span class="label"><i class="fa-solid fa-flag-checkered"></i> Checkpoints:</span>
+                     <span class="value" id="creator-hud-checkpoints">0</span>
+                </div>
+            </div>
+
+            <div class="bubble-divider"></div>
+
+            <div class="bubble-controls">
+                 <h5>CONTROLS & TOOLTIPS</h5>
+                 <div class="control-item">
+                     <kbd>[G]</kbd>
+                     <span class="desc">Add Spawn Grid (Max 8)</span>
+                 </div>
+                 <div class="control-item">
+                     <kbd>[E]</kbd>
+                     <span class="desc">Add Checkpoint</span>
+                 </div>
+                 <div class="control-item">
+                     <kbd>[BACKSPACE]</kbd>
+                     <span class="desc">Delete Last Action</span>
+                 </div>
+                 <div class="control-item">
+                     <kbd>[ENTER]</kbd>
+                     <span class="desc">Save & Finish Track</span>
+                 </div>
+                 <div class="control-item">
+                     <kbd>[ESC]</kbd>
+                     <span class="desc">Cancel & Discard</span>
+                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript NUI Bridge -->
+    <script src="script.js"></script>
+</body>
+</html>
